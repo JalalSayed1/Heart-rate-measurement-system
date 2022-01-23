@@ -62,9 +62,10 @@ void write_to_max( int reg, int col){ //! reg means row (maybe)
 }
 
 //writes 8 bytes to the display  
+// char  pattern_star[8] = { 0x04, 0x15, 0x0e, 0x1f, 0x0e, 0x15, 0x04, 0x00};
 void pattern_to_display(char *testdata){
     int cdata; // data to be written to one of the rows
-    for(int idx = 0; idx <= 7; idx++) {
+    for(int idx = 0; idx <= 7; idx++) { // idx of the row
         cdata = testdata[idx]; 
         write_to_max(idx+1,cdata);
     }
@@ -104,39 +105,58 @@ int main(){
     double MIN_VOLTAGE = 0.0;
 
     // data to be written to the last column:
+    // left shift all values (throwing the first elt out), update last elt to the new signal value, send to display it 
     char  data_to_write[8] = { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     
     int output_value;
     
+    clear(); // to clear display before start
+
     while (true) {
         
-        setup_dot_matrix ();      /* setup matric */
+        setup_dot_matrix(); //setup matrix
 
         // output value in percent:
         output_value = (int) signal/MAX_VOLTAGE*100
+
+        // led_num = which led to turn on on the last column:
+        char led_num;
+        switch(output_value){
+            // each row ~ 13%
+            case 0 ... 13: led_num = 0x0 ; break; // at row 0
+            case 14 ... 26: led_num = 0x1 ; break; // at row 1
+            case 27 ... 39: led_num = 0x2 ; break; // at row 2
+            case 40 ... 53: led_num = 0x3 ; break; // at row 3
+            case 54 ... 66: led_num = 0x4 ; break; // at row 4
+            case 67 ... 79: led_num = 0x5 ; break; // at row 5
+            case 80 ... 92: led_num = 0x6 ; break; // at row 6
+            case 93 ... 100: led_num = 0x7 ; break; // at row 7
+        }
+        // left shift all values:
+        for(int i=1; i<8; i++){
+            data_to_write[i-1] = data_to_write[i];
+        }
+        // then update the last element only:
+        data_to_write[7] = led_num;
+
+
+        // update the display:
+        pattern_to_display(data_to_write);
+        wait_ms(500); // ms
         
-        //da_star();
-        pattern_to_display(pattern_diagonal);
-        wait_ms(1000);
-        pattern_to_display(pattern_square);
-        wait_ms(1000);
-        pattern_to_display(pattern_star);
-        wait_ms(1000);
-        clear();
-
-
+        // clear(); // to clear display
 
         // for(int i=0; i<8; i++){
         //     switch(output_value){
         //         // each row ~ 13%
-        //         case 0 ... 13: Din = ; break; // row 0
-        //         case 14 ... 26: Din = ; break; // row 1
-        //         case 27 ... 39: Din = ; break; // row 2
-        //         case 40 ... 53: Din = ; break; // row 3
-        //         case 54 ... 66: Din = ; break; // row 4
-        //         case 67 ... 79: Din = ; break; // row 5
-        //         case 80 ... 92: Din = ; break; // row 6
-        //         case 93 ... 100: Din = ; break; // row 7
+        //         case 0 ... 13: reg = 0 ; break; // row 0
+        //         case 14 ... 26: reg = 1 ; break; // row 1
+        //         case 27 ... 39: reg = 2 ; break; // row 2
+        //         case 40 ... 53: reg = 3 ; break; // row 3
+        //         case 54 ... 66: reg = 4 ; break; // row 4
+        //         case 67 ... 79: reg = 5 ; break; // row 5
+        //         case 80 ... 92: reg = 6 ; break; // row 6
+        //         case 93 ... 100: reg = 7 ; break; // row 7
                 
         //         default:
         //             Din << "BAD VALUE";
