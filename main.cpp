@@ -1,9 +1,15 @@
 #include "mbed.h"
 //#include "platform/mbed_thread.h"
 #include "TextLCD.h"
+
+//! to del later if not used
+#include <iostream>
 #include <thread>
 
+
 /*
+* Code breakdown:
+
 TREAD #1:
 Get analogue input from the op-amps (for small amount of time eg. 1Hz = 1000ms)
 convert it to digital (ADC)
@@ -14,13 +20,14 @@ lowest row is the min voltage
 
 THREAD #2:
 loop over the rows of the display fast (>=50Hz) and set the correct row to GND and the correct column to +ve voltage
+we will always update the last column and shift old column values to the left 
 8 rows covers 100% => each row = 12.5%
 
 */
 
 // Inputs:
 // ADC - signal from op-amps
-AnalogIn signal();
+AnalogIn signal(A0);
 // Outputs:
 // to display pins
 //DigitalOut gpo(D0);
@@ -38,8 +45,6 @@ int main(){
     {0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0}};
     
-    // counter to tell us at what column are we on. starts at 0 up to 7 then stops incrementing:
-    int counter = 0;
     
     // max and min voltages we can get from the op-amps:
     double MAX_VOLTAGE = 3.3;
