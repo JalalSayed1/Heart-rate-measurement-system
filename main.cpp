@@ -119,20 +119,20 @@ unsigned int filter(int prevSingal, int currectSignal)
 
 /**
  * @brief average = the sum of samples / size
- * 
- * @param ptr 
- * @param size 
- * @return unsigned int 
+ *
+ * @param ptr
+ * @param size
+ * @return unsigned int
  */
-unsigned int rollingAverage(int* ptr, int size){
+unsigned int rollingAverage(int *ptr, int size)
+{
     unsigned int average = 0;
     for (int i = 0; i < size; i++)
     {
         average += *(ptr + i);
     }
-    return (unsigned int) average / size;
+    return (unsigned int)average / size;
 }
-
 
 int Normalise(int signal)
 {
@@ -165,13 +165,13 @@ int main()
     // a row in matrix, a value from 1-7
     int row;
     int numOfSamples = 5; // = array length
-    unsigned int samples[numOfSamples];
+    int samples[numOfSamples];
     // (*) means give access - dereference.
     // (&) means reference to variable and returns the address of that variable.
     // dataPtr points to place where data can be read, will start at the second elt so we can process the signal using 2 values (first and second values):
-    int *dataPtr = &samples + 1;
+    int *dataPtr = &samples[1];
     // samplePtr points to place where next data can be written:
-    int *samplePtr = &samples;
+    int *samplePtr = &samples[0];
     int numOfDataSampled = 0;
 
     while (true)
@@ -190,7 +190,7 @@ int main()
             prevSignal = *(dataPtr - 1);
             // filter the signal and output it:
             signal = filter(prevSignal, signal);
-            signal = rollingAverage(&samples, numOfSamples);
+            signal = rollingAverage(&samples[0], numOfSamples);
             row = Normalise(signal);
 
             //* update display:
@@ -198,7 +198,7 @@ int main()
 
             // reset values:
             numOfDataSampled = 0;
-            *samplePtr = &samples;
+            samplePtr = &samples[0];
         }
 
         // if this is the first signal we get:
