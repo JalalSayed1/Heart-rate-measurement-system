@@ -147,6 +147,30 @@ int Normalise(int signal)
     return (int)result;
 }
 
+Ticker interruptTimer;
+unsigned int signal;
+unsigned int prevSignal = 0;
+// a row in matrix, a value from 1-7
+int row;
+const int numOfSamples = 5; // = array length
+int samples[numOfSamples];
+// (*) means give access - dereference.
+// (&) means reference to variable and returns the address of that variable.
+// dataPtr points to place where data can be read, will start at the second elt so we can process the signal using 2 values (first and second values):
+int *dataPtr = &samples[1];
+// samplePtr points to place where next data can be written:
+int *samplePtr = &samples[0];
+int numOfDataSampled = 0;
+
+void performSampling()
+{
+    signal = Din;
+    *samplePtr = signal;
+    numOfDataSampled++;
+    samplePtr = samplePtr + 1;
+    wait_ms(500);
+}
+
 int main()
 {
     // data to be written to the last column:
@@ -160,28 +184,10 @@ int main()
 
     setup_dot_matrix();
 
-    unsigned int signal;
-    unsigned int prevSignal = 0;
-    // a row in matrix, a value from 1-7
-    int row;
-    int numOfSamples = 5; // = array length
-    int samples[numOfSamples];
-    // (*) means give access - dereference.
-    // (&) means reference to variable and returns the address of that variable.
-    // dataPtr points to place where data can be read, will start at the second elt so we can process the signal using 2 values (first and second values):
-    int *dataPtr = &samples[1];
-    // samplePtr points to place where next data can be written:
-    int *samplePtr = &samples[0];
-    int numOfDataSampled = 0;
-
     while (true)
     {
-        //* sample data:
-        signal = Din;
-        *samplePtr = signal;
-        numOfDataSampled++;
-        samplePtr = samplePtr + 1;
-        wait_ms(500);
+
+        interruptTimer.attach(&performSampling, 0.1);
 
         if (numOfDataSampled == numOfSamples)
         {
