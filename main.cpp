@@ -107,8 +107,7 @@ void clear()
     }
 }
 
-unsigned int filter(int prevSingal, int currectSignal)
-{
+unsigned int filter(int prevSingal, int currectSignal){
     unsigned int outputSignal;
     int alpha = 0.2;
     // equation:
@@ -124,8 +123,7 @@ unsigned int filter(int prevSingal, int currectSignal)
  * @param size
  * @return unsigned int
  */
-unsigned int rollingAverage(int *ptr, int size)
-{
+unsigned int rollingAverage(int *ptr, int size){
     unsigned int average = 0;
     for (int i = 0; i < size; i++)
     {
@@ -134,8 +132,7 @@ unsigned int rollingAverage(int *ptr, int size)
     return (unsigned int)average / size;
 }
 
-int Normalise(int signal)
-{
+int Normalise(int signal){
     // char is 8 bits long:
     char result = (char)signal;
     // shift by 4 places:
@@ -162,41 +159,29 @@ int *dataPtr = &samples[1];
 int *samplePtr = &samples[0];
 int numOfDataSampled = 0;
 
-void performSampling()
-{
+void performSampling(){
     signal = Din;
     *samplePtr = signal;
     numOfDataSampled++;
-    samplePtr = samplePtr + 1;
-    wait_ms(500);
+    *samplePtr++;
+    // wait_ms(500);
 }
 
-int main()
-{
-    // data to be written to the last column:
-    // left shift all values (throwing the first elt out), update last elt to the new signal value, send to display it
-    // char data_to_write[8] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-
-    // char sampleBuffer;
-    // int outputValue;
-
-    // clear(); // to clear display before start
+int main(){
 
     setup_dot_matrix();
 
-    while (true)
-    {
+    while (true){
 
         interruptTimer.attach(&performSampling, 0.1);
 
-        if (numOfDataSampled == numOfSamples)
-        {
+        if (numOfDataSampled == numOfSamples){
             //* process data:
             signal = *dataPtr;
-            prevSignal = *(dataPtr - 1);
+            prevSignal = *dataPtr--;
             // filter the signal and output it:
-            signal = filter(prevSignal, signal);
-            signal = rollingAverage(&samples[0], numOfSamples);
+            // signal = filter(prevSignal, signal);
+            // signal = rollingAverage(&samples[0], numOfSamples);
             row = Normalise(signal);
 
             //* update display:
@@ -205,87 +190,12 @@ int main()
             // reset values:
             numOfDataSampled = 0;
             samplePtr = &samples[0];
+            // if pointer overflows:
+            if (dataPtr == &samples[numOfSamples])
+            {
+                dataPtr = &samples[0];
+            }
         }
 
-        // if this is the first signal we get:
-        // if (prevSignal == 0)
-        // {
-        //     prevSignal = signal;
-        //     *samplePtr = signal;
-        //     samplePtr = samplePtr + 1;
-        //     // we do not have enough samples so do not go any further that here:
-        //     continue;
-        // }
-
-        // if (*samplePtr ==)
-        // col 1 means last col as 1 = 0000 0001 in binary
-        // TODO make a for loop and update the col by col by using the old samples:
-
-        // output value in percent:
-        // outputValue = (int) signal / MAX_VOLTAGE * 100;
-
-        // led_num = which led to turn on on the last column:
-        // char row;
-
-        // switch (outputValue){
-        // // each row ~ 13% of MAX_VOLTAGE
-        // case 0 ... 13:
-        //     row = 0x0;
-        //     break; // at row 0
-        // case 14 ... 26:
-        //     row = 0x1;
-        //     break; // at row 1
-        // case 27 ... 39:
-        //     row = 0x2;
-        //     break; // at row 2
-        // case 40 ... 53:
-        //     row = 0x3;
-        //     break; // at row 3
-        // case 54 ... 66:
-        //     row = 0x4;
-        //     break; // at row 4
-        // case 67 ... 79:
-        //     row = 0x5;
-        //     break; // at row 5
-        // case 80 ... 92:
-        //     row = 0x6;
-        //     break; // at row 6
-        // case 93 ... 100:
-        //     row = 0x7;
-        //     break; // at row 7
-        // }
-        // left shift all values:
-        // for (int i = 1; i < 8; i++)
-        // {
-        //     data_to_write[i - 1] = data_to_write[i];
-        // }
-        // then update the last element only:
-        // data_to_write[7] = row;
-
-        // update the display:
-        // pattern_to_display(data_to_write);
-        // wait_ms(500); // ms
-
-        // clear(); // to clear display
-
-        // for(int i=0; i<8; i++){
-        //     switch(output_value){
-        //         // each row ~ 13%
-        //         case 0 ... 13: reg = 0 ; break; // row 0
-        //         case 14 ... 26: reg = 1 ; break; // row 1
-        //         case 27 ... 39: reg = 2 ; break; // row 2
-        //         case 40 ... 53: reg = 3 ; break; // row 3
-        //         case 54 ... 66: reg = 4 ; break; // row 4
-        //         case 67 ... 79: reg = 5 ; break; // row 5
-        //         case 80 ... 92: reg = 6 ; break; // row 6
-        //         case 93 ... 100: reg = 7 ; break; // row 7
-
-        //         default:
-        //             Din << "BAD VALUE";
-        //             break;
-
-        //     }
-        //     thread_sleep_for(1000); //0.5s
-        // }
     }
 }
